@@ -32,6 +32,8 @@ def get_params(argv='1'):
         nb_mel_bins=64,
 
         # DNN MODEL PARAMETERS
+        isbaseline=True,
+        ratio=1,
         label_sequence_length=60,        # Feature sequence length
         batch_size=256,              # Batch size
         dropout_rate=0,             # Dropout rate, constant for all layers
