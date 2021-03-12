@@ -178,7 +178,7 @@ def _tensor_shape(tensor):
 
 
 def get_model(data_in, data_out, dropout_rate, nb_cnn2d_filt, f_pool_size, t_pool_size,
-              rnn_size, fnn_size, weights, doa_objective, is_accdoa, is_baseline, ratio):
+              rnn_size, fnn_size, weights, doa_objective, is_accdoa, is_baseline, ratio, is_tcn):
     # model definition
     spec_start = Input(shape=(data_in[-3], data_in[-2], data_in[-1]))
 
@@ -212,6 +212,59 @@ def get_model(data_in, data_out, dropout_rate, nb_cnn2d_filt, f_pool_size, t_poo
         spec_cnn = Dropout(dropout_rate)(spec_cnn)
 
     spec_cnn = Permute((2, 1, 3))(spec_cnn)
+
+    if is_tcn:
+        resblock_input = Reshape((data_in[-2], -1))(spec_cnn)
+
+        skip_connections = []
+
+        for d in range(10):
+
+            # 1D convolution
+            spec_conv1d = keras.layers.Convolution1D(filters=256,
+                                                     kernel_size=(3),
+                                                     padding='same',
+                                                     dilation_rate=2 ** d)(resblock_input)
+            spec_conv1d = BatchNormalization()(spec_conv1d)
+
+            # activations
+            tanh_out = keras.layers.Activation('tanh')(spec_conv1d)
+            sigm_out = keras.layers.Activation('sigmoid')(spec_conv1d)
+            spec_act = keras.layers.Multiply()([tanh_out, sigm_out])
+
+            # spatial dropout
+            spec_drop = keras.layers.SpatialDropout1D(rate=0.5)(spec_act)
+
+            # 1D convolution
+            skip_output = keras.layers.Convolution1D(filters=128,
+                                                     kernel_size=(1),
+                                                     padding='same')(spec_drop)
+
+            res_output = keras.layers.Add()([resblock_input, skip_output])
+
+            if skip_output is not None:
+                skip_connections.append(skip_output)
+
+            resblock_input = res_output
+        # ---------------------------------------
+
+        # Residual blocks sum
+        spec_sum = keras.layers.Add()(skip_connections)
+        spec_sum = keras.layers.Activation('relu')(spec_sum)
+
+        # 1D convolution
+        spec_conv1d_2 = keras.layers.Convolution1D(filters=128,
+                                                   kernel_size=(1),
+                                                   padding='same')(spec_sum)
+        spec_conv1d_2 = keras.layers.Activation('relu')(spec_conv1d_2)
+
+        # 1D convolution
+        spec_tcn = keras.layers.Convolution1D(filters=128,
+                                              kernel_size=(1),
+                                              padding='same')(spec_conv1d_2)
+        spec_tcn = keras.layers.Activation('tanh')(spec_tcn)
+
+        spec_cnn = spec_tcn
 
     # RNN    
     spec_rnn = Reshape((data_out[-2] if is_accdoa else data_out[0][-2], -1))(spec_cnn)
