@@ -369,7 +369,7 @@ def masked_mse(y_gt, model_out):
     sed_out = keras.backend.repeat_elements(sed_out, 3, -1)
     sed_out = keras.backend.cast(sed_out, 'float32')
 
-    # Use the mask to computed mse now. Normalize with the mask weights 
+    # Use the mask to computed mse now. Normalize with the mask weights
     return keras.backend.sqrt(keras.backend.sum(
         keras.backend.square(y_gt[:, :, nb_classes:] - model_out[:, :, nb_classes:]) * sed_out)) / keras.backend.sum(
         sed_out)
