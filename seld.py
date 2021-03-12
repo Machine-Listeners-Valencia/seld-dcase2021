@@ -120,9 +120,12 @@ def main(argv):
 
         print('Using loss weights : {}'.format(params['loss_weights']))
         model = keras_model.get_model(data_in=data_in, data_out=data_out, dropout_rate=params['dropout_rate'],
-                                      nb_cnn2d_filt=params['nb_cnn2d_filt'], f_pool_size=params['f_pool_size'], t_pool_size=params['t_pool_size'],
+                                      nb_cnn2d_filt=params['nb_cnn2d_filt'], f_pool_size=params['f_pool_size'],
+                                      t_pool_size=params['t_pool_size'],
                                       rnn_size=params['rnn_size'], fnn_size=params['fnn_size'],
-                                      weights=params['loss_weights'], doa_objective=params['doa_objective'], is_accdoa=params['is_accdoa'])
+                                      weights=params['loss_weights'], doa_objective=params['doa_objective'],
+                                      is_accdoa=params['is_accdoa'], is_baseline=params['is_baseline'],
+                                      ratio=params['ratio'], is_tcn=params['is_tcn'])
 
         # Dump results in DCASE output format for calculating final scores
         dcase_output_val_folder = os.path.join(params['dcase_output_dir'], '{}_{}_{}_val'.format(task_id, params['dataset'], params['mode']))
