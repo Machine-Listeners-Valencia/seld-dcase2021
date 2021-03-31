@@ -12,6 +12,7 @@ import keras_model
 import parameter
 import time
 
+
 def dump_DCASE2021_results(_data_gen, _feat_cls, _dcase_output_folder, _sed_pred, _doa_pred):
     '''
     Write the filewise results to individual csv files
@@ -36,10 +37,11 @@ def dump_DCASE2021_results(_data_gen, _feat_cls, _dcase_output_folder, _sed_pred
 
 
 def get_accdoa_labels(accdoa_in, nb_classes):
-    x, y, z = accdoa_in[:, :, :nb_classes], accdoa_in[:, :, nb_classes:2*nb_classes], accdoa_in[:, :, 2*nb_classes:]
-    sed = np.sqrt(x**2 + y**2 + z**2) > 0.5
-      
+    x, y, z = accdoa_in[:, :, :nb_classes], accdoa_in[:, :, nb_classes:2 * nb_classes], accdoa_in[:, :, 2 * nb_classes:]
+    sed = np.sqrt(x ** 2 + y ** 2 + z ** 2) > 0.5
+
     return sed, accdoa_in
+
 
 def main(argv):
     """
@@ -86,7 +88,9 @@ def main(argv):
 
     for split_cnt, split in enumerate(test_splits):
         print('\n\n---------------------------------------------------------------------------------------------------')
-        print('------------------------------------      SPLIT {}   -----------------------------------------------'.format(split))
+        print(
+            '------------------------------------      SPLIT {}   -----------------------------------------------'.format(
+                split))
         print('---------------------------------------------------------------------------------------------------')
 
         # Unique name for the run
@@ -114,9 +118,11 @@ def main(argv):
         print('FEATURES:\n\tdata_in: {}\n\tdata_out: {}\n'.format(data_in, data_out))
 
         nb_classes = data_gen_train.get_nb_classes()
-        print('MODEL:\n\tdropout_rate: {}\n\tCNN: nb_cnn_filt: {}, f_pool_size{}, t_pool_size{}\n\trnn_size: {}, fnn_size: {}\n\tdoa_objective: {}\n'.format(
-            params['dropout_rate'], params['nb_cnn2d_filt'], params['f_pool_size'], params['t_pool_size'], params['rnn_size'],
-            params['fnn_size'], params['doa_objective']))
+        print(
+            'MODEL:\n\tdropout_rate: {}\n\tCNN: nb_cnn_filt: {}, f_pool_size{}, t_pool_size{}\n\trnn_size: {}, fnn_size: {}\n\tdoa_objective: {}\n'.format(
+                params['dropout_rate'], params['nb_cnn2d_filt'], params['f_pool_size'], params['t_pool_size'],
+                params['rnn_size'],
+                params['fnn_size'], params['doa_objective']))
 
         print('Using loss weights : {}'.format(params['loss_weights']))
         model = keras_model.get_model(data_in=data_in, data_out=data_out, dropout_rate=params['dropout_rate'],
@@ -128,7 +134,8 @@ def main(argv):
                                       ratio=params['ratio'], is_tcn=params['is_tcn'])
 
         # Dump results in DCASE output format for calculating final scores
-        dcase_output_val_folder = os.path.join(params['dcase_output_dir'], '{}_{}_{}_val'.format(task_id, params['dataset'], params['mode']))
+        dcase_output_val_folder = os.path.join(params['dcase_output_dir'],
+                                               '{}_{}_{}_val'.format(task_id, params['dataset'], params['mode']))
         cls_feature_class.delete_and_create_folder(dcase_output_val_folder)
         print('Dumping recording-wise val results in: {}'.format(dcase_output_val_folder))
 
@@ -169,7 +176,7 @@ def main(argv):
             else:
                 sed_pred = reshape_3Dto2D(pred[0]) > 0.5
                 doa_pred = reshape_3Dto2D(pred[1] if params['doa_objective'] is 'mse' else pred[1][:, :, nb_classes:])
-            
+
             # Calculate the DCASE 2021 metrics - Location-aware detection and Class-aware localization scores
             dump_DCASE2021_results(data_gen_val, feat_cls, dcase_output_val_folder, sed_pred, doa_pred)
             seld_metric[epoch_cnt, :] = score_obj.get_SELD_Results(dcase_output_val_folder)
@@ -186,8 +193,8 @@ def main(argv):
                 '\n\t\t DCASE2021 SCORES: ER: {:0.2f}, F: {:0.1f}, LE: {:0.1f}, LR:{:0.1f}, seld_score (early stopping score): {:0.2f}, '
                 'best_seld_score: {:0.2f}, best_epoch : {}\n'.format(
                     epoch_cnt, time.time() - start, tr_loss[epoch_cnt],
-                    seld_metric[epoch_cnt, 0], seld_metric[epoch_cnt, 1]*100,
-                    seld_metric[epoch_cnt, 2], seld_metric[epoch_cnt, 3]*100,
+                    seld_metric[epoch_cnt, 0], seld_metric[epoch_cnt, 1] * 100,
+                    seld_metric[epoch_cnt, 2], seld_metric[epoch_cnt, 3] * 100,
                     seld_metric[epoch_cnt, -1], best_seld_metric, best_epoch
                 )
             )
@@ -200,14 +207,17 @@ def main(argv):
         print('\tSELD_score (early stopping score) : {}'.format(best_seld_metric))
 
         print('\n\tDCASE2021 scores')
-        print('\tClass-aware localization scores: Localization Error: {:0.1f}, Localization Recall: {:0.1f}'.format(seld_metric[best_epoch, 2], seld_metric[best_epoch, 3]*100))
-        print('\tLocation-aware detection scores: Error rate: {:0.2f}, F-score: {:0.1f}'.format(seld_metric[best_epoch, 0], seld_metric[best_epoch, 1]*100))
+        print('\tClass-aware localization scores: Localization Error: {:0.1f}, Localization Recall: {:0.1f}'.format(
+            seld_metric[best_epoch, 2], seld_metric[best_epoch, 3] * 100))
+        print('\tLocation-aware detection scores: Error rate: {:0.2f}, F-score: {:0.1f}'.format(
+            seld_metric[best_epoch, 0], seld_metric[best_epoch, 1] * 100))
 
         # ------------------  Calculate metric scores for unseen test split ---------------------------------
         print('\nLoading the best model and predicting results on the testing split')
         print('\tLoading testing dataset:')
         data_gen_test = cls_data_generator.DataGenerator(
-            params=params, split=split, shuffle=False, per_file=True, is_eval=True if params['mode'] is 'eval' else False
+            params=params, split=split, shuffle=False, per_file=True,
+            is_eval=True if params['mode'] is 'eval' else False
         )
 
         model = keras_model.load_seld_model('{}_model.h5'.format(unique_name), params['doa_objective'])
@@ -222,12 +232,12 @@ def main(argv):
             test_doa_pred = reshape_3Dto2D(test_doa_pred)
         else:
             test_sed_pred = reshape_3Dto2D(pred_test[0]) > 0.5
-            test_doa_pred = reshape_3Dto2D(pred_test[1] if params['doa_objective'] is 'mse' else pred_test[1][:, :, nb_classes:])
-
-
+            test_doa_pred = reshape_3Dto2D(
+                pred_test[1] if params['doa_objective'] is 'mse' else pred_test[1][:, :, nb_classes:])
 
         # Dump results in DCASE output format for calculating final scores
-        dcase_output_test_folder = os.path.join(params['dcase_output_dir'], '{}_{}_{}_test'.format(task_id, params['dataset'], params['mode']))
+        dcase_output_test_folder = os.path.join(params['dcase_output_dir'],
+                                                '{}_{}_{}_test'.format(task_id, params['dataset'], params['mode']))
         cls_feature_class.delete_and_create_folder(dcase_output_test_folder)
         print('Dumping recording-wise test results in: {}'.format(dcase_output_test_folder))
         dump_DCASE2021_results(data_gen_test, feat_cls, dcase_output_test_folder, test_sed_pred, test_doa_pred)
@@ -238,8 +248,11 @@ def main(argv):
 
             print('Results on test split:')
             print('\tDCASE2021 Scores')
-            print('\tClass-aware localization scores: Localization Error: {:0.1f}, Localization Recall: {:0.1f}'.format(test_seld_metric[2], test_seld_metric[3]*100))
-            print('\tLocation-aware detection scores: Error rate: {:0.2f}, F-score: {:0.1f}'.format(test_seld_metric[0], test_seld_metric[1]*100))
+            print('\tClass-aware localization scores: Localization Error: {:0.1f}, Localization Recall: {:0.1f}'.format(
+                test_seld_metric[2], test_seld_metric[3] * 100))
+            print('\tLocation-aware detection scores: Error rate: {:0.2f}, F-score: {:0.1f}'.format(test_seld_metric[0],
+                                                                                                    test_seld_metric[
+                                                                                                        1] * 100))
             print('\tSELD (early stopping metric): {:0.2f}'.format(test_seld_metric[-1]))
 
 

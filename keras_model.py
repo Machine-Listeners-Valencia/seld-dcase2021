@@ -313,14 +313,16 @@ def get_model(data_in, data_out, dropout_rate, nb_cnn2d_filt, f_pool_size, t_poo
 
 
 def masked_mse(y_gt, model_out):
-    nb_classes = 12 #TODO fix this hardcoded value of number of classes
+    nb_classes = 12  # TODO fix this hardcoded value of number of classes
     # SED mask: Use only the predicted DOAs when gt SED > 0.5
-    sed_out = y_gt[:, :, :nb_classes] >= 0.5 
+    sed_out = y_gt[:, :, :nb_classes] >= 0.5
     sed_out = keras.backend.repeat_elements(sed_out, 3, -1)
     sed_out = keras.backend.cast(sed_out, 'float32')
 
     # Use the mask to computed mse now. Normalize with the mask weights 
-    return keras.backend.sqrt(keras.backend.sum(keras.backend.square(y_gt[:, :, nb_classes:] - model_out[:, :, nb_classes:]) * sed_out))/keras.backend.sum(sed_out)
+    return keras.backend.sqrt(keras.backend.sum(
+        keras.backend.square(y_gt[:, :, nb_classes:] - model_out[:, :, nb_classes:]) * sed_out)) / keras.backend.sum(
+        sed_out)
 
 
 def load_seld_model(model_file, doa_objective):
@@ -331,6 +333,3 @@ def load_seld_model(model_file, doa_objective):
     else:
         print('ERROR: Unknown doa objective: {}'.format(doa_objective))
         exit()
-
-
-
