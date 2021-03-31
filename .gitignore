@@ -1,7 +1,5 @@
 base_folder/
 .idea/
-base_folder/
-.idea/
 __pycache__/
 metrics/__pycache__/
 models/
