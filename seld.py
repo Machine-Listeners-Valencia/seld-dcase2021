@@ -258,6 +258,7 @@ def main(argv):
 
 if __name__ == "__main__":
     try:
+        os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
         sys.exit(main(sys.argv))
     except (ValueError, IOError) as e:
         sys.exit(e)
