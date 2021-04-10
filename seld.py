@@ -70,6 +70,8 @@ def main(argv):
     # use parameter set defined by user
     task_id = '1' if len(argv) < 2 else argv[1]
     params = parameter.get_params(task_id)
+    if params['is_tcn'] is True:
+        params['is_accdoa'] = False
 
     job_id = 1 if len(argv) < 3 else argv[-1]
 
@@ -125,13 +127,21 @@ def main(argv):
                 params['fnn_size'], params['doa_objective']))
 
         print('Using loss weights : {}'.format(params['loss_weights']))
-        model = keras_model.get_model(data_in=data_in, data_out=data_out, dropout_rate=params['dropout_rate'],
-                                      nb_cnn2d_filt=params['nb_cnn2d_filt'], f_pool_size=params['f_pool_size'],
-                                      t_pool_size=params['t_pool_size'],
-                                      rnn_size=params['rnn_size'], fnn_size=params['fnn_size'],
-                                      weights=params['loss_weights'], doa_objective=params['doa_objective'],
-                                      is_accdoa=params['is_accdoa'], is_baseline=params['is_baseline'],
-                                      ratio=params['ratio'], is_tcn=params['is_tcn'])
+        if params['is_tcn']:
+            model = keras_model.get_seldtcn_model(data_in=data_in, data_out=data_out,
+                                                  dropout_rate=params['dropout_rate'],
+                                                  nb_cnn2d_filt=params['nb_cnn2d_filt'],
+                                                  pool_size=params['f_pool_size'], fnn_size=params['fnn_size'],
+                                                  weights=params['loss_weights'], ratio=params['ratio'])
+
+        else:
+            model = keras_model.get_model(data_in=data_in, data_out=data_out, dropout_rate=params['dropout_rate'],
+                                          nb_cnn2d_filt=params['nb_cnn2d_filt'], f_pool_size=params['f_pool_size'],
+                                          t_pool_size=params['t_pool_size'],
+                                          rnn_size=params['rnn_size'], fnn_size=params['fnn_size'],
+                                          weights=params['loss_weights'], doa_objective=params['doa_objective'],
+                                          is_accdoa=params['is_accdoa'], is_baseline=params['is_baseline'],
+                                          ratio=params['ratio'], is_tcn=params['is_tcn'])
 
         # Dump results in DCASE output format for calculating final scores
         dcase_output_val_folder = os.path.join(params['dcase_output_dir'],
