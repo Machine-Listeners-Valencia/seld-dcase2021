@@ -14,13 +14,13 @@ def get_params(argv='1'):
         dataset_dir='base_folder/',  # Base folder containing the foa_dev/mic_dev and metadata folders
 
         # OUTPUT PATH
-        feat_label_dir='seld_feat_label_both/',  # Directory to dump extracted features and labels
+        feat_label_dir='seld_feat_label_foa/',  # Directory to dump extracted features and labels
         model_dir='models/',  # Dumps the trained models and training curves in this folder
         dcase_output_dir='results/',  # recording-wise results are dumped in this path.
 
         # DATASET LOADING PARAMETERS
         mode='dev',  # 'dev' - development or 'eval' - evaluation dataset
-        dataset='both',  # 'foa' - ambisonic or 'mic' - microphone signals
+        dataset='foa',  # 'foa' - ambisonic or 'mic' - microphone signals
 
         # FEATURE PARAMS
         fs=24000,
@@ -39,7 +39,11 @@ def get_params(argv='1'):
 
         is_baseline=False,
         ratio=1,
+<<<<<<< HEAD
         is_tcn=False,
+=======
+        is_tcn=True,
+>>>>>>> e677078e8b271f00ae75c1e6dc3132e389123c05
 
         nb_cnn2d_filt=64,  # Number of CNN nodes, constant for each layer
         f_pool_size=[4, 4, 2],
