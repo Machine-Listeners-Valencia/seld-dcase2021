@@ -39,11 +39,7 @@ def get_params(argv='1'):
 
         is_baseline=False,
         ratio=1,
-<<<<<<< HEAD
         is_tcn=False,
-=======
-        is_tcn=True,
->>>>>>> e677078e8b271f00ae75c1e6dc3132e389123c05
 
         nb_cnn2d_filt=64,  # Number of CNN nodes, constant for each layer
         f_pool_size=[4, 4, 2],
